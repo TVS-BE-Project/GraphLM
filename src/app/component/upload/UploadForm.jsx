@@ -1,5 +1,6 @@
 "use client"
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { RotateCcw } from "lucide-react";
 
 export default function UploadForm() {
   const [files, setFiles] = useState([]);
@@ -9,7 +10,75 @@ export default function UploadForm() {
   const [collectionName, setCollectionName] = useState('');
   const [showPreview, setShowPreview] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef(null);
+
+  // Update URL when collection changes
+  useEffect(() => {
+    if (collectionName) {
+      const url = new URL(window.location);
+      url.searchParams.set('collection', collectionName);
+      window.history.replaceState({}, '', url);
+      
+      // Dispatch custom event for real-time updates
+      window.dispatchEvent(new CustomEvent('collectionChanged', { 
+        detail: collectionName 
+      }));
+    } else {
+      // Remove collection from URL when empty
+      const url = new URL(window.location);
+      url.searchParams.delete('collection');
+      window.history.replaceState({}, '', url);
+    }
+  }, [collectionName]);
+
+  const deleteData = async () => {
+    if (!collectionName) {
+      alert('Please enter a collection name first');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete all data for collection "${collectionName}"?\n\nThis will delete:\n- Qdrant collection: ${collectionName}\n- All Neo4j nodes and relationships\n\nThis action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      const response = await fetch('/api/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          collection: collectionName,
+          target: 'both' // Delete both Qdrant and Neo4j
+        }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setResult({
+          ...result.results,
+          deleteSuccess: true
+        });
+        
+        // Dispatch event to notify ChatPanel that data was deleted
+        window.dispatchEvent(new CustomEvent('dataDeleted'));
+      } else {
+        setResult({
+          error: result.error || 'Failed to delete data'
+        });
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      setResult({
+        error: `Delete failed: ${error.message}`
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const addFiles = (newFiles) => {
     const incoming = Array.from(newFiles || []);
@@ -193,6 +262,8 @@ export default function UploadForm() {
                 setFiles([]);
                 setCollectionName('');
                 setResult(null);
+                // Dispatch event to clear collection from ChatPanel
+                window.dispatchEvent(new CustomEvent('dataDeleted'));
               }}
               className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm"
             >
@@ -204,7 +275,34 @@ export default function UploadForm() {
 
       {result && (
         <div className="mt-3 space-y-2">
-          {result.qdrant && (
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Results:</span>
+            {!result.deleteSuccess && collectionName && (
+              <button
+                onClick={deleteData}
+                disabled={deleting}
+                className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded border border-red-200 transition-colors disabled:opacity-50"
+                title={`Delete collection "${collectionName}" and all Neo4j data`}
+              >
+                <RotateCcw className="w-3 h-3" />
+                {deleting ? 'Deleting...' : 'Reset Data'}
+              </button>
+            )}
+          </div>
+          
+          {result.deleteSuccess && (
+            <div className="bg-orange-50 text-orange-700 border border-orange-200 px-3 py-2 rounded text-sm">
+              <div className="font-medium">Data Deleted Successfully</div>
+              {result.qdrant && (
+                <div className="text-xs mt-1">Qdrant: {result.qdrant.message}</div>
+              )}
+              {result.neo4j && (
+                <div className="text-xs mt-1">Neo4j: {result.neo4j.message}</div>
+              )}
+            </div>
+          )}
+          
+          {result.qdrant && !result.deleteSuccess && (
             <div className={`flex items-center gap-2 px-3 py-2 rounded text-sm ${
               result.qdrant.status === 'ok' 
                 ? 'bg-green-50 text-green-700 border border-green-200' 
