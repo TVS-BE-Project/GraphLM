@@ -7,6 +7,8 @@ export default function UploadForm() {
   const [result, setResult] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [collectionName, setCollectionName] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState('');
   const fileInputRef = useRef(null);
 
   const addFiles = (newFiles) => {
@@ -16,6 +18,20 @@ export default function UploadForm() {
       if (!merged.some((m) => m.name === f.name && m.size === f.size)) merged.push(f);
     }
     setFiles(merged);
+  };
+
+  const previewFile = (file) => {
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    setShowPreview(true);
+  };
+
+  const closePreview = () => {
+    setShowPreview(false);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl('');
+    }
   };
 
   const uploadFiles = async (fileList) => {
@@ -75,91 +91,102 @@ export default function UploadForm() {
   };
 
   return (
-    <form className="w-full h-full mt-0 bg-white rounded-lg shadow-sm  flex flex-col justify-between">
-      <div className="p-4 space-y-4">
-        <h3 className="text-xl font-semibold mb-0">Upload Research Paper</h3>
-        <p className="text-sm text-gray-600">Select PDF(s) below, enter a collection name, then click Upload &amp; Index.</p>
-
-        <div
-          className={`upload-dropzone border-2 rounded-lg p-6 mb-2 flex flex-col items-center justify-center text-center transition-colors ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-dashed border-gray-200 bg-white'}`}
-          onClick={() => fileInputRef.current?.click()}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter') fileInputRef.current?.click(); }}
-          aria-label="Upload PDF files"
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            name="files"
-            multiple
-            accept="application/pdf"
-            onChange={onFileChange}
-            className="hidden"
-          />
-
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
-            </div>
-            <div>
-              <div className="text-sm font-medium">Click to upload PDF or drag and drop</div>
-              <div className="text-xs text-gray-500 mt-2">Only PDF files are accepted. Selected files will be uploaded when you click Upload & Index.</div>
-            </div>
-          </div>
-        </div>
-
-        {files.length > 0 && (
-          <div className="file-list mb-2">
-            <h4 className="text-sm font-medium mb-2">Selected files</h4>
-            <ul className="space-y-2">
-              {files.map((f, i) => (
-                <li key={`${f.name}-${f.size}`} className="file-item flex items-center justify-between p-3 border rounded">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded text-sm font-medium">PDF</div>
-                    <div>
-                      <div className="text-sm font-medium">{f.name}</div>
-                      <div className="text-xs text-gray-500">{humanFileSize(f.size)}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button type="button" onClick={() => removeFile(i)} className="text-sm text-red-600">Remove</button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div className="mb-2">
-          <label className="block text-sm font-medium mb-2">Qdrant collection name</label>
-          <div className="flex items-center gap-3">
-            <input
-              value={collectionName}
-              onChange={(e) => setCollectionName(e.target.value)}
-              className="flex-1 border rounded px-2 py-1 text-sm"
-              placeholder="Collection name"
-              aria-label="Qdrant collection name"
-            />
+    <div className="w-full h-full flex flex-col">
+      {showPreview ? (
+        <div className="flex-1 flex flex-col">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">PDF Preview</span>
             <button
-              type="button"
-              onClick={() => uploadFiles(files)}
-              disabled={loading || !collectionName || files.length === 0}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full shadow hover:bg-blue-700 disabled:opacity-50"
+              onClick={closePreview}
+              className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded"
             >
-              {loading ? 'Uploading...' : 'Upload'}
+              Close Preview
             </button>
+          </div>
+          <iframe
+            src={previewUrl}
+            className="flex-1 w-full border border-gray-300 rounded"
+            title="PDF Preview"
+          />
+        </div>
+      ) : (
+        <>
+          <div
+            className={`${result ? 'h-22' : 'h-48'} border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-center transition-all duration-300 cursor-pointer ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}
+            onClick={() => fileInputRef.current?.click()}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter') fileInputRef.current?.click(); }}
+        aria-label="Upload PDF files"
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          name="files"
+          multiple
+          accept="application/pdf"
+          onChange={onFileChange}
+          className="hidden"
+        />
+
+        <div className="flex flex-col items-center justify-center p-4">
+          <div className="w-12 h-12 mb-2 text-gray-400">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+          </div>
+          <div className="text-gray-600">
+            <div className="text-sm mb-1">Click to upload PDF or drag and drop</div>
           </div>
         </div>
       </div>
 
-      <div className="border-t p-4 bg-white">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">{loading ? 'Uploading...' : 'Ready'}</div>
-          <div className="flex items-center gap-3">
+      {files.length > 0 && (
+        <div className="mt-4 space-y-2">
+          <div className="text-sm font-medium text-gray-700">Selected files:</div>
+          {files.map((f, i) => (
+            <div key={`${f.name}-${f.size}`} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-sm">
+              <span className="flex-1 text-gray-700 truncate pr-2" title={f.name}>{f.name}</span>
+              <button
+                type="button"
+                onClick={() => previewFile(f)}
+                className="flex-shrink-0 text-blue-600 hover:text-blue-800 text-xs px-2 py-1 border border-blue-200 rounded mr-1"
+              >
+                Preview
+              </button>
+              <button 
+                type="button" 
+                onClick={() => removeFile(i)} 
+                className="flex-shrink-0 text-red-500 hover:text-red-700 w-6 h-6 flex items-center justify-center"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {files.length > 0 && (
+        <div className="mt-4 space-y-3">
+          <input
+            value={collectionName}
+            onChange={(e) => setCollectionName(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            placeholder="Enter collection name"
+            aria-label="Collection name"
+          />
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => uploadFiles(files)}
+              disabled={loading || !collectionName || files.length === 0}
+              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+            >
+              {loading ? 'Uploading...' : 'Upload & Index'}
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -167,20 +194,53 @@ export default function UploadForm() {
                 setCollectionName('');
                 setResult(null);
               }}
-              className="px-4 py-2 border rounded-full"
+              className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 text-sm"
             >
               Reset
             </button>
           </div>
         </div>
+      )}
 
-        {result && (
-          <div className="mt-4 bg-gray-50 p-3 rounded text-sm">
-            <div className="font-medium mb-2">Result</div>
-            <pre className="text-xs overflow-auto">{JSON.stringify(result, null, 2)}</pre>
-          </div>
-        )}
-      </div>
-    </form>
+      {result && (
+        <div className="mt-3 space-y-2">
+          {result.qdrant && (
+            <div className={`flex items-center gap-2 px-3 py-2 rounded text-sm ${
+              result.qdrant.status === 'ok' 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${
+                result.qdrant.status === 'ok' ? 'bg-green-500' : 'bg-red-500'
+              }`}></div>
+              <span className="font-medium">Qdrant:</span> 
+              <span>{result.qdrant.status === 'ok' ? `Added ${result.qdrant.added || 0} vectors` : 'Failed'}</span>
+            </div>
+          )}
+          {result.neo4j && (
+            <div className={`flex items-center gap-2 px-3 py-2 rounded text-sm ${
+              result.neo4j.status === 'ok' 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${
+                result.neo4j.status === 'ok' ? 'bg-green-500' : 'bg-red-500'
+              }`}></div>
+              <span className="font-medium">Neo4j:</span> 
+              <span>{result.neo4j.status === 'ok' ? `Added ${result.neo4j.nodesAdded || 0} nodes, ${result.neo4j.relationshipsAdded || 0} relationships` : 'Failed'}</span>
+            </div>
+          )}
+          {result.error && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded text-sm bg-red-50 text-red-700 border border-red-200">
+              <div className="w-2 h-2 rounded-full bg-red-500"></div>
+              <span className="font-medium">Error:</span> 
+              <span>{result.error}</span>
+            </div>
+          )}
+        </div>
+      )}
+        </>
+      )}
+    </div>
   );
 }
