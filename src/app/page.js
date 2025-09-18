@@ -1,61 +1,97 @@
-import { GetStartedButton, HeaderAuth } from "./component/auth"
+import Header from "./component/Header";
+import Footer from "./component/Footer";
+import { Brain, FileText, Network } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            AI Starter
-          </div>
-          <nav className="flex items-center gap-6">
-            <a href="#" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Docs</a>
-            <a href="#" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
-            <HeaderAuth />
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen bg-white text-foreground flex flex-col">
+      <Header />
 
-      <main className="flex-1">
-        <section className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-6">Build smarter with AI + OAuth</h1>
-            <p className="text-lg text-gray-600 mb-8">A lightweight Next.js starter with GitHub sign-in, Prisma-backed users, and ready-to-plug AI integrations.</p>
-            <div className="flex items-center gap-4">
-              <GetStartedButton />
-              <a href="#features" className="text-sm text-gray-600 hover:text-gray-900">Learn more</a>
+      <main className="flex-1 border-t border-b border-slate-100">
+  <section className="relative py-20 px-0 text-center">
+          <div className="container mx-auto max-w-4xl">
+            <div className="">
+              <h1 className="mb-6 text-5xl font-extrabold tracking-tight lg:text-6xl text-slate-900">
+                Welcome to <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-400">GraphLM</span> AI-powered Knowledge Graphs from Research
+              </h1>
+              <p className="mb-8 text-lg text-slate-600 max-w-2xl mx-auto">
+                Upload research papers, generate structured knowledge, and explore interactive insights with our cutting-edge AI technology.
+              </p>
+
+              <div className="flex items-center justify-center gap-4">
+                <a href="/chat" className="inline-flex items-center gap-2 px-8 py-3 text-lg font-semibold shadow-lg transition-all duration-300 rounded-full bg-gradient-to-r from-blue-600 to-teal-400 text-white ring-1 ring-blue-200/40 hover:scale-[1.02]">Try GraphLM</a>
+                <a href="#features" className="text-sm text-slate-600 hover:text-slate-800">Learn more</a>
+              </div>
             </div>
-          </div>
-
-          <div className="h-64 bg-gradient-to-br from-indigo-50 to-teal-50 rounded-lg flex items-center justify-center">
-            <div className="text-center text-gray-400">Illustration / screenshot</div>
           </div>
         </section>
 
-        <section id="features" className="border-t py-16 bg-gray-50">
-          <div className="max-w-6xl mx-auto px-6">
-            <h2 className="text-2xl font-semibold mb-6">Why this starter?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 bg-white rounded-lg shadow">
-                <h3 className="font-medium mb-2">OAuth made easy</h3>
-                <p className="text-sm text-gray-600">Login with GitHub out of the box using NextAuth and Prisma.</p>
+  <section id="features" className="py-16 px-0">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-semibold text-slate-900 mb-4">Transform Research into Knowledge Graphs</h2>
+              <p className="text-base text-slate-600 max-w-2xl mx-auto">
+                GraphLM revolutionizes how researchers explore and understand complex academic literature by automatically generating interactive knowledge graphs from PDF documents.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              <div className="rounded-xl text-center p-6 bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <div className="pt-6">
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-teal-400 to-green-400 text-white">
+                      <FileText className="h-6 w-6" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">Upload Research</h3>
+                  <p className="text-slate-600">Simply upload your PDF research papers and let our AI analyze the content.</p>
+                </div>
               </div>
-              <div className="p-6 bg-white rounded-lg shadow">
-                <h3 className="font-medium mb-2">Prisma + Postgres</h3>
-                <p className="text-sm text-gray-600">Persistent user records and adapters ready for production.</p>
+
+              <div className="rounded-xl text-center p-6 bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <div className="pt-6">
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-teal-400 text-white">
+                      <Brain className="h-6 w-6" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">AI Processing</h3>
+                  <p className="text-slate-600">Our advanced AI extracts key concepts, relationships, and insights from your documents.</p>
+                </div>
               </div>
-              <div className="p-6 bg-white rounded-lg shadow">
-                <h3 className="font-medium mb-2">AI-ready</h3>
-                <p className="text-sm text-gray-600">Drop in your AI models and use authenticated endpoints to power features.</p>
+
+              <div className="rounded-xl text-center p-6 bg-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <div className="pt-6">
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-teal-400 to-green-400 text-white">
+                      <Network className="h-6 w-6" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">Visualize Knowledge</h3>
+                  <p className="text-slate-600">Explore interactive knowledge graphs that reveal hidden connections in your research.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <div className="max-w-2xl w-full bg-white border border-slate-100 shadow-md rounded-xl">
+                <div className="p-8 text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-teal-400 shadow-lg text-white">
+                      <Network className="h-8 w-8" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-3">Ready to explore your research?</h3>
+                  <p className="text-slate-600 mb-6">Join researchers worldwide who are already using GraphLM to unlock insights from their academic papers and discover new connections in their field.</p>
+                  <a href="/upload" className="inline-flex items-center gap-2 px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-blue-600 to-teal-400 rounded-full text-white">Try GraphLM</a>
+                </div>
               </div>
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t">
-        <div className="max-w-6xl mx-auto px-6 py-6 text-sm text-gray-600">© {new Date().getFullYear()} AI Starter</div>
-      </footer>
+      <Footer />
     </div>
-  )
+  );
 }

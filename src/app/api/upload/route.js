@@ -6,14 +6,14 @@ import os from 'os';
 import crypto from 'crypto';
 import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
-import { OpenAIEmbeddings } from '@langchain/openai';
-import { QdrantVectorStore } from '@langchain/qdrant';
+import { indexToQdrant } from '@/src/lib/qdrantIndex';
+import { indexToNeo4j } from '@/src/lib/neo4jIndex';
 
 // POST /api/upload
 // Accepts multipart/form-data with fields:
 // - files: one or more file inputs (PDFs)
-// - texts: one or more text fields (plain text JSON or form fields)
-// Also accepts application/json body with { texts: string[] }
+// - collection: the qdrant collection name to index into
+// Also accepts application/json body with { /* texts: string[] */ }
 
 export async function POST(req) {
   try {
@@ -22,8 +22,13 @@ export async function POST(req) {
     // Collect documents as objects: { pageContent: string, metadata: { source } }
     const docs = [];
 
+    let providedCollection = null;
+
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
+
+      // Read collection name provided by the user in the form
+      providedCollection = formData.get('collection') || null;
 
       // Handle uploaded files (expecting input name "files")
       const fileEntries = formData.getAll('files');
@@ -50,23 +55,15 @@ export async function POST(req) {
         try { await fs.promises.unlink(tmpPath); } catch (e) { /* ignore */ }
       }
 
-      // Handle plain text fields (can be repeated) under the name "texts"
-      const textEntries = formData.getAll('texts');
-      for (const t of textEntries) {
-        if (!t) continue;
-        if (typeof t === 'string') {
-          docs.push({ pageContent: t, metadata: { source: 'inline-text' } });
-        }
-      }
+      // NOTE: Text inputs are intentionally skipped for now as requested.
+      // const textEntries = formData.getAll('texts');
+      // ...
     } else if (contentType.includes('application/json')) {
       const body = await req.json();
-      if (Array.isArray(body.texts)) {
-        for (const t of body.texts) {
-          if (typeof t === 'string') docs.push({ pageContent: t, metadata: { source: 'json-text' } });
-        }
-      } else if (typeof body.text === 'string') {
-        docs.push({ pageContent: body.text, metadata: { source: 'json-text' } });
-      }
+      // JSON text input handling will be implemented later per request.
+      // if (Array.isArray(body.texts)) { ... }
+      // Allow collection via JSON as well
+      if (body.collection) providedCollection = body.collection;
     } else {
       return new Response(JSON.stringify({ error: 'Unsupported content-type' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
@@ -79,30 +76,28 @@ export async function POST(req) {
     const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000, chunkOverlap: 200 });
     const splitDocs = await splitter.splitDocuments(docs);
 
-    // Create embeddings
-    const embeddings = new OpenAIEmbeddings({
-      model: process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small',
-      openAIApiKey: process.env.OPENAI_API_KEY,
-    });
-
-    // Connect to Qdrant vector store
-    const qdrantUrl = process.env.QDRANT_URL || process.env.NEXT_PUBLIC_QDRANT_URL;
-    const qdrantCollection = process.env.QDRANT_COLLECTION || 'langchainjs-testing';
-    const qdrantApiKey = process.env.QDRANT_API_KEY;
-
-    if (!qdrantUrl) {
-      return new Response(JSON.stringify({ error: 'QDRANT_URL not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    // Determine collection name: prefer user-provided, fallback to env
+    const qdrantCollection = providedCollection || process.env.QDRANT_COLLECTION;
+    if (!qdrantCollection) {
+      return new Response(JSON.stringify({ error: 'No Qdrant collection provided. Please provide a collection name in the form (field: collection).' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {
-      url: qdrantUrl,
-      collectionName: qdrantCollection,
-      apiKey: qdrantApiKey,
-    });
+    // Index to Qdrant using helper
+    const qdrantResult = await indexToQdrant(splitDocs, qdrantCollection);
 
-    await vectorStore.addDocuments(splitDocs);
+    // If Neo4j is configured, index there as well. If not configured, skip gracefully.
+    let neo4jResult = null;
+    if (process.env.NEO4J_URI || providedCollection?.startsWith('neo4j:')) {
+      try {
+        // Allow optional per-request control: collection name prefixed with "neo4j:" is ignored but used as flag
+        neo4jResult = await indexToNeo4j(splitDocs, { clear: false });
+      } catch (err) {
+        console.error('Neo4j indexing failed', err);
+        neo4jResult = { status: 'error', message: String(err) };
+      }
+    }
 
-    return new Response(JSON.stringify({ status: 'ok', added: splitDocs.length, collection: qdrantCollection }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ qdrant: qdrantResult, neo4j: neo4jResult }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   } catch (err) {
     console.error('Indexing error', err);
     return new Response(JSON.stringify({ error: 'internal_error', message: String(err) }), { status: 500, headers: { 'Content-Type': 'application/json' } });
