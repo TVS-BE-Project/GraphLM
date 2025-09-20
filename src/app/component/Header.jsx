@@ -13,7 +13,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/60 backdrop-blur-sm backdrop-saturate-150">
-      <div className="container px-6 py-3 flex items-center justify-between">
+      <div className="container px-6 py-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-teal-500">

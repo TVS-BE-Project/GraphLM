@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "OAuth + Next-Auth + Prisma",
-  description: "A lightweight Next.js starter with GitHub sign-in using Next-Auth, Prisma-backed Postgres Database, and ready-to-plug AI integrations.",
+  title: "GraphLM",
+  description: "An AI-powered research workspace for analyzing documents with RAG chat, knowledge graphs, and vector search capabilities.",
 };
 
 export default function RootLayout({ children }) {

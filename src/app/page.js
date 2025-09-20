@@ -83,7 +83,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-2xl font-bold text-slate-900 mb-3">Ready to explore your research?</h3>
                   <p className="text-slate-600 mb-6">Join researchers worldwide who are already using GraphLM to unlock insights from their academic papers and discover new connections in their field.</p>
-                  <a href="/upload" className="inline-flex items-center gap-2 px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-blue-600 to-teal-400 rounded-full text-white">Try GraphLM</a>
+                  <a href="/chat" className="inline-flex items-center gap-2 px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-blue-600 to-teal-400 rounded-full text-white">Try GraphLM</a>
                 </div>
               </div>
             </div>

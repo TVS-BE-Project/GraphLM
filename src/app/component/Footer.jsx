@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="w-full border-t border-slate-100 bg-white">
-      <div className="container max-w-6xl mx-auto px-6 py-8">
+      <div className="container max-w-6xl mx-auto px-6 py-4">
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
           <div className="flex items-center space-x-4 text-sm text-slate-600">
             <a href="https://www.linkedin.com/in/tabishaliansari/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-800 transition-colors">Tabish</a>

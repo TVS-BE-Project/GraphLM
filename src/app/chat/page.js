@@ -1,7 +1,7 @@
 import Header from "../component/Header";
 import Footer from "../component/Footer";
 import UploadForm from "../component/upload/UploadForm";
-import ChatPanel from "../component/chat/ChatPanel";
+import ResizablePanels from "../component/ResizablePanels";
 import { Upload, FileText, Send, MessageCircle, Network } from "lucide-react";
 
 export default function UploadPage() {
@@ -13,41 +13,11 @@ export default function UploadPage() {
         <section className="w-full h-full overflow-hidden">
           <div className="flex items-center justify-center py-2">
             <div className="text-center">
-              <h1 className="text-2xl font-semibold">Research Workspace</h1>
-              <p className="text-sm text-slate-600">
-                Chat with AI, visualize knowledge graphs, and upload PDFs to
-                index.
-              </p>
+              <h1 className="text-xl font-semibold">Research Workspace</h1>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full h-[calc(100%-6rem)] overflow-hidden px-2 md:px-6">
-            {/* Chat */}
-            <ChatPanel />
-
-            {/* Knowledge graph */}
-            <div className="border border-slate-100 rounded-lg p-2 h-full flex flex-col overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium flex items-center gap-2">
-                  <Network className="h-4 w-4 text-slate-600" />
-                  Knowledge Graph
-                </h3>
-                <button
-                  type="button"
-                  className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors"
-                >
-                  Show Graph
-                </button>
-              </div>
-              <div className="flex-1 rounded-md border-2 border-dashed border-slate-100 bg-gray-50 flex items-center justify-center text-slate-400 p-6 overflow-hidden">
-                <div className="text-center">
-                  Knowledge Graph Visualization
-                  <br />
-                  Upload a PDF to generate an interactive graph
-                </div>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 w-full h-[calc(100%-4rem)] overflow-hidden px-2 md:px-6 relative">
             {/* Upload panel */}
             <div className="border border-slate-100 rounded-lg p-2 h-full flex flex-col overflow-hidden">
               <div className="flex items-center justify-between mb-3">
@@ -60,6 +30,9 @@ export default function UploadPage() {
                 <UploadForm />
               </div>
             </div>
+
+            {/* Resizable Panels - Chat and Knowledge Graph (spans 3 columns) */}
+            <ResizablePanels />
           </div>
         </section>
       </main>
