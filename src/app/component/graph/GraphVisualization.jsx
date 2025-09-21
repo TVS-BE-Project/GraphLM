@@ -66,9 +66,9 @@ export default function GraphVisualization({
     const options = {
       nodes: {
         shape: 'dot',
-        size: 25,
+        size: 40, // Increased from 25 to 30
         font: {
-          size: 14,
+          size: 25,
           color: '#1f2937',
           face: 'arial',
           background: 'rgba(255,255,255,0.7)',
@@ -103,7 +103,7 @@ export default function GraphVisualization({
         }
       },
       edges: {
-        width: 2,
+        width: 4,
         color: { 
           color: '#64748b', 
           highlight: '#1e293b',
@@ -122,7 +122,7 @@ export default function GraphVisualization({
           roundness: 0.5
         },
         font: {
-          size: 12,
+          size: 20,
           color: '#475569',
           strokeWidth: 2,
           strokeColor: '#ffffff',
@@ -141,7 +141,7 @@ export default function GraphVisualization({
           updateInterval: 50
         },
         barnesHut: {
-          gravitationalConstant: -20000, // Much stronger repulsion
+          gravitationalConstant: -15000, // Much stronger repulsion
           centralGravity: 0.05, // Minimal central gravity
           springLength: 200, // Longer springs for more space
           springConstant: 0.02, // Weaker springs
