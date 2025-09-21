@@ -2,6 +2,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import ChatPanel from "./chat/ChatPanel";
+import GraphVisualization from "./graph/GraphVisualization";
+import FullScreenGraph from "./graph/FullScreenGraph";
 import { Network } from "lucide-react";
 
 export default function ResizablePanels() {
@@ -10,6 +12,8 @@ export default function ResizablePanels() {
   const graphPanelRef = useRef(null);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [isGraphCollapsed, setIsGraphCollapsed] = useState(false);
+  const [showFullScreenGraph, setShowFullScreenGraph] = useState(false);
+  const [currentCollection, setCurrentCollection] = useState("");
 
   useEffect(() => {
     // Load saved layout from localStorage on component mount
@@ -22,6 +26,24 @@ export default function ResizablePanels() {
         console.error("Failed to parse saved layout:", error);
       }
     }
+
+    // Listen for collection changes
+    const handleCollectionChange = (event) => {
+      setCurrentCollection(event.detail || "");
+    };
+
+    // Read initial collection from URL
+    const params = new URLSearchParams(window.location.search);
+    const collection = params.get('collection');
+    if (collection) {
+      setCurrentCollection(collection);
+    }
+
+    window.addEventListener('collectionChanged', handleCollectionChange);
+
+    return () => {
+      window.removeEventListener('collectionChanged', handleCollectionChange);
+    };
   }, []);
 
   const onLayout = (sizes) => {
@@ -62,6 +84,14 @@ export default function ResizablePanels() {
     }
   };
 
+  const handleResizeHandleDoubleClick = () => {
+    // Reset both panels to equal sizes (50/50)
+    if (chatPanelRef.current && graphPanelRef.current) {
+      chatPanelRef.current.resize(50);
+      graphPanelRef.current.resize(50);
+    }
+  };
+
   return (
     <PanelGroup direction="horizontal" onLayout={onLayout} className="col-span-3 relative">
       {/* Chat Panel */}
@@ -75,16 +105,17 @@ export default function ResizablePanels() {
         <ChatPanel />
       </Panel>
 
-      {/* Resize Handle - Click to toggle collapse/expand */}
+      {/* Resize Handle - Click to toggle collapse/expand, Double-click to reset to 50/50 */}
       <PanelResizeHandle 
         className="w-2 transition-colors flex items-center justify-center group hover:bg-slate-300 cursor-pointer"
         onClick={handleResizeHandleClick}
+        onDoubleClick={handleResizeHandleDoubleClick}
         title={
           isChatCollapsed 
-            ? "Click to expand chat panel" 
+            ? "Click to expand chat panel • Double-click to reset layout" 
             : isGraphCollapsed 
-            ? "Click to expand graph panel" 
-            : "Click to collapse a panel or drag to resize"
+            ? "Click to expand graph panel • Double-click to reset layout" 
+            : "Click to collapse a panel • Double-click to reset layout • Drag to resize"
         }
       >
         <div className="w-0.5 h-4 bg-slate-300 group-hover:bg-slate-500 transition-colors"></div>
@@ -106,20 +137,32 @@ export default function ResizablePanels() {
             </h3>
             <button
               type="button"
-              className="px-3 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors"
+              onClick={() => {
+                // Dummy action - no longer opens full screen
+                console.log('Full Graph button clicked - dummy action');
+              }}
+              className="px-3 py-1 text-xs bg-gray-400 hover:bg-gray-500 text-white rounded-full transition-colors cursor-default"
+              title="Full Graph (dummy button)"
             >
               Full Graph
             </button>
           </div>
-          <div className="flex-1 rounded-md border-2 border-dashed border-slate-100 bg-gray-50 flex items-center justify-center text-slate-400 p-6 overflow-hidden">
-            <div className="text-center">
-              Knowledge Graph Visualization
-              <br />
-              Upload a PDF to generate an interactive graph
-            </div>
+          <div className="flex-1 overflow-hidden">
+            <GraphVisualization 
+              collection={currentCollection || "all"}
+              isFullScreen={false}
+              onMaximize={() => setShowFullScreenGraph(true)}
+            />
           </div>
         </div>
       </Panel>
+
+      {/* Full Screen Graph Modal */}
+      <FullScreenGraph 
+        isOpen={showFullScreenGraph}
+        onClose={() => setShowFullScreenGraph(false)}
+        collection={currentCollection || "all"}
+      />
     </PanelGroup>
   );
 }
