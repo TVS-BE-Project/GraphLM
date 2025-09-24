@@ -1,7 +1,7 @@
-import Header from "../component/Header";
-import Footer from "../component/Footer";
-import UploadForm from "../component/upload/UploadForm";
-import ResizablePanels from "../component/ResizablePanels";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import UploadForm from "../components/upload/UploadForm";
+import ResizablePanels from "../components/ResizablePanels";
 import { Upload, FileText, Send, MessageCircle, Network } from "lucide-react";
 
 export default function UploadPage() {
