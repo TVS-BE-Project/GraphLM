@@ -29,6 +29,11 @@ export default function UploadForm() {
       const url = new URL(window.location);
       url.searchParams.delete('collection');
       window.history.replaceState({}, '', url);
+
+      // Notify other components that collection is cleared
+      window.dispatchEvent(new CustomEvent('collectionChanged', {
+        detail: ''
+      }));
     }
   }, [collectionName]);
 

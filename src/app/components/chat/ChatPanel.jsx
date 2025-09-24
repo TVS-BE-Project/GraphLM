@@ -29,7 +29,8 @@ export default function ChatPanel() {
 
     // Listen for collection changes from UploadForm
     const handleCollectionChange = (event) => {
-      setCurrentCollection(event.detail);
+      // If cleared, fall back to default collection
+      setCurrentCollection(event.detail || "research_papers");
     };
 
     // Listen for data deletion events
@@ -71,9 +72,9 @@ export default function ChatPanel() {
       const response = await fetch("/api/rag-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           message: text,
-          collection: currentCollection // Use the URL-based collection
+          collection: currentCollection || "research_papers"
         }),
       });
 
