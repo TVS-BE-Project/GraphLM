@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import { Maximize2, Minimize2 } from 'lucide-react';
@@ -19,39 +19,37 @@ export default function GraphVisualization({
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
   const [stats, setStats] = useState({ nodeCount: 0, edgeCount: 0 });
 
-  // Fetch graph data from Neo4j
-  const fetchGraphData = async () => {
+  // Debounce timer ref
+  const debounceTimer = useRef(null);
+
+  // Stable fetch function
+  const fetchGraphData = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const params = new URLSearchParams({
         collection: collection,
-        limit: isFullScreen ? '500' : '100' // More nodes for full screen
+        limit: isFullScreen ? '500' : '100'
       });
-      
       console.log('Fetching graph data for collection:', collection, 'isFullScreen:', isFullScreen);
       const response = await fetch(`/api/graph?${params}`);
       const data = await response.json();
-      
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch graph data');
       }
-      
       console.log('Graph data received:', data);
       setGraphData({
         nodes: data.nodes || [],
         edges: data.edges || []
       });
       setStats(data.stats || { nodeCount: 0, edgeCount: 0 });
-      
     } catch (err) {
       console.error('Graph fetch error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
+  }, [collection, isFullScreen]);
 
   // Initialize vis-network
   useEffect(() => {
@@ -277,10 +275,14 @@ export default function GraphVisualization({
     };
   }, [graphData, loading, error, isFullScreen]);
 
-  // Fetch data on mount and when collection changes
+  // Debounced effect for collection changes
   useEffect(() => {
-    fetchGraphData();
-  }, [collection]);
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      fetchGraphData();
+    }, 400); // 400ms debounce
+    return () => clearTimeout(debounceTimer.current);
+  }, [collection, fetchGraphData]);
 
   if (loading) {
     return (
