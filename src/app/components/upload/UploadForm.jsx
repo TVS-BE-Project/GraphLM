@@ -156,7 +156,13 @@ export default function UploadForm() {
     setDragActive(false);
   };
 
-  const removeFile = (idx) => setFiles((s) => s.filter((_, i) => i !== idx));
+  const removeFile = (idx) => {
+    setFiles((s) => s.filter((_, i) => i !== idx));
+    // Clear the file input to allow re-selecting the same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const humanFileSize = (size) => {
     if (size === 0) return "0 B";
@@ -267,6 +273,10 @@ export default function UploadForm() {
                 setFiles([]);
                 setCollectionName('');
                 setResult(null);
+                // Clear the file input to allow re-selecting files
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = '';
+                }
                 // Dispatch event to clear collection from ChatPanel
                 window.dispatchEvent(new CustomEvent('dataDeleted'));
               }}
