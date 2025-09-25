@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { MessageCircle, Send, User, Bot } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { cn } from "@/src/lib/utils";
 
 export default function ChatPanel() {
   const [message, setMessage] = useState("");
@@ -9,6 +12,30 @@ export default function ChatPanel() {
   const [streamResponse, setStreamResponse] = useState("");
   const [currentCollection, setCurrentCollection] = useState("");
   const messagesEndRef = useRef(null);
+
+  // Function to parse citations from content
+  const parseContent = (content) => {
+    const citationRegex = /\\\[\\\[citation:([^\\]]+?)\\\]\\\]/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = citationRegex.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push({ type: "text", value: content.substring(lastIndex, match.index) });
+      }
+      const citationData = match[1].split("|").map((s) => s.trim());
+      const source = citationData[0];
+      const page = citationData[1] || "N/A";
+      parts.push({ type: "citation", source, page });
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < content.length) {
+      parts.push({ type: "text", value: content.substring(lastIndex) });
+    }
+    return parts;
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -153,12 +180,61 @@ export default function ChatPanel() {
                     <Bot className="w-3 h-3 text-blue-600" />
                   </div>
                 )}
-                <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                <div className={cn(
+                  "max-w-[80%] rounded-lg px-3 py-2 text-sm",
                   msg.role === "user" 
                     ? "bg-blue-600 text-white" 
                     : "bg-white border border-gray-200"
-                }`}>
-                  <div className="whitespace-pre-wrap">{msg.content}</div>
+                )}>
+                  {msg.role === "user" ? (
+                    <div className="whitespace-pre-wrap">{msg.content}</div>
+                  ) : (
+                    <div>
+                      {parseContent(msg.content).map((part, index) =>
+                        part.type === "text" ? (
+                          <ReactMarkdown
+                            key={index}
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              code({ node, inline, className, children, ...props }) {
+                                const match = /language-(\w+)/.exec(className || "");
+                                return !inline && match ? (
+                                  <pre className="bg-gray-800 text-white p-2 rounded-md overflow-x-auto my-2">
+                                    <code className={className} {...props}>
+                                      {children}
+                                    </code>
+                                  </pre>
+                                ) : (
+                                  <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded-sm" {...props}>
+                                    {children}
+                                  </code>
+                                );
+                              },
+                              p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                              a: ({ node, ...props }) => <a className="text-blue-600 hover:underline" {...props} />,
+                              ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-2" {...props} />,
+                              ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-2" {...props} />,
+                              li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                              h1: ({ node, ...props }) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                              h2: ({ node, ...props }) => <h2 className="text-md font-semibold mb-2" {...props} />,
+                              h3: ({ node, ...props }) => <h3 className="text-sm font-medium mb-1" {...props} />,
+                              blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2" {...props} />,
+                            }}
+                          >
+                            {part.value}
+                          </ReactMarkdown>
+                        ) : (
+                          <span
+                            key={index}
+                            className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-1 cursor-pointer hover:bg-blue-200 transition-colors"
+                            title={`Source: ${part.source}, Page: ${part.page}`}
+                          >
+                            [{part.source}:{part.page}]
+                          </span>
+                        )
+                      )}
+                    </div>
+                  )}
                 </div>
                 {msg.role === "user" && (
                   <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
@@ -177,10 +253,54 @@ export default function ChatPanel() {
                 <div className="max-w-[80%] space-y-2">
                   {streamResponse && (
                     <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm">
-                      <div className="whitespace-pre-wrap">{streamResponse}</div>
-                      {streaming && (
-                        <span className="inline-block w-2 h-4 bg-blue-600 animate-pulse ml-1"></span>
-                      )}
+                      <div>
+                        {parseContent(streamResponse).map((part, index) =>
+                          part.type === "text" ? (
+                            <ReactMarkdown
+                              key={index}
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                code({ node, inline, className, children, ...props }) {
+                                  const match = /language-(\w+)/.exec(className || "");
+                                  return !inline && match ? (
+                                    <pre className="bg-gray-800 text-white p-2 rounded-md overflow-x-auto my-2">
+                                      <code className={className} {...props}>
+                                        {children}
+                                      </code>
+                                    </pre>
+                                  ) : (
+                                    <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded-sm" {...props}>
+                                      {children}
+                                    </code>
+                                  );
+                                },
+                                p: ({ node, ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                                a: ({ node, ...props }) => <a className="text-blue-600 hover:underline" {...props} />,
+                                ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-2" {...props} />,
+                                ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-2" {...props} />,
+                                li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                                h1: ({ node, ...props }) => <h1 className="text-lg font-bold mb-2" {...props} />,
+                                h2: ({ node, ...props }) => <h2 className="text-md font-semibold mb-2" {...props} />,
+                                h3: ({ node, ...props }) => <h3 className="text-sm font-medium mb-1" {...props} />,
+                                blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2" {...props} />,
+                              }}
+                            >
+                              {part.value}
+                            </ReactMarkdown>
+                          ) : (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 ml-1 cursor-pointer hover:bg-blue-200 transition-colors"
+                              title={`Source: ${part.source}, Page: ${part.page}`}
+                            >
+                              [{part.source}:{part.page}]
+                            </span>
+                          )
+                        )}
+                        {streaming && (
+                          <span className="inline-block w-2 h-4 bg-blue-600 animate-pulse ml-1"></span>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
