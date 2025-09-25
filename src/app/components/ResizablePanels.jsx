@@ -129,7 +129,7 @@ export default function ResizablePanels() {
         collapsible={true}
         className="relative"
       >
-        <div className="border border-slate-100 rounded-lg p-2 h-full flex flex-col overflow-hidden">
+        <div className="border-2 border-slate-100 rounded-lg p-2 h-full flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-medium flex items-center gap-2">
               <Network className="h-4 w-4 text-slate-600" />
