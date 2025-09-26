@@ -1,6 +1,6 @@
 "use client"
 import { useState, useRef, useEffect } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Eye, Trash2 } from "lucide-react";
 
 export default function UploadForm() {
   const [files, setFiles] = useState([]);
@@ -228,21 +228,25 @@ export default function UploadForm() {
         <div className="mt-4 space-y-2">
           <div className="text-sm font-medium text-gray-700">Selected files:</div>
           {files.map((f, i) => (
-            <div key={`${f.name}-${f.size}`} className="flex items-center gap-2 p-2 bg-gray-50 rounded text-sm">
+            <div key={`${f.name}-${f.size}`} className={`flex items-center gap-2 p-2 bg-gray-50 rounded text-sm ${loading ? 'pulse-horizontal' : ''}`}>
               <span className="flex-1 text-gray-700 truncate pr-2" title={f.name}>{f.name}</span>
               <button
                 type="button"
                 onClick={() => previewFile(f)}
                 className="flex-shrink-0 text-blue-600 hover:text-blue-800 text-xs px-2 py-1 border border-blue-200 rounded mr-1"
+                aria-label="Preview PDF"
+                title="Preview"
               >
-                Preview
+                <Eye className="w-4 h-4" />
               </button>
-              <button 
-                type="button" 
-                onClick={() => removeFile(i)} 
+              <button
+                type="button"
+                onClick={() => removeFile(i)}
                 className="flex-shrink-0 text-red-500 hover:text-red-700 w-6 h-6 flex items-center justify-center"
+                aria-label="Remove file"
+                title="Delete"
               >
-                ×
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           ))}
