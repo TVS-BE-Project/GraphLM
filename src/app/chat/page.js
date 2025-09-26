@@ -1,10 +1,20 @@
+import { redirect } from 'next/navigation'
+import { getServerSession } from 'next-auth'
+import { authConfig } from '@/auth'
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import UploadForm from "../components/upload/UploadForm";
 import ResizablePanels from "../components/ResizablePanels";
 import { Upload, FileText, Send, MessageCircle, Network } from "lucide-react";
 
-export default function UploadPage() {
+export default async function ChatPage() {
+  const session = await getServerSession(authConfig);
+
+  if (!session) {
+    // User not signed in → back to landing page
+    redirect('/')
+  }
+
   return (
     <div className="h-screen bg-white text-gray-900 flex flex-col overflow-hidden">
       <Header />
