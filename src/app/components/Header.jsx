@@ -7,8 +7,8 @@ export default function Header() {
   const router = useRouter();
 
   const onCta = () => {
-    if (pathname === '/chat') router.push('/');
-    else router.push('/chat');
+    if (pathname === '/workspace') router.push('/');
+    else router.push('/workspace');
   };
 
   return (
@@ -32,7 +32,7 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           {/* <button onClick={onCta} className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-teal-400 text-white font-medium shadow-md hover:shadow-lg transition-all duration-300 rounded-full">
-            {pathname === '/chat' ? 'Back to Home' : 'Try GraphLM'}
+            {pathname === '/workspace' ? 'Back to Home' : 'Try GraphLM'}
           </button> */}
           <div className="hidden sm:block ">
             <HeaderAuth />

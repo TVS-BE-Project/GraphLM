@@ -32,7 +32,7 @@ export default async function LandingPage() {
                 {/* show different text and redirect depending on auth state */}
                 {session ? (
                   <a
-                    href="/chat"
+                    href="/workspace"
                     className="inline-flex items-center gap-2 px-8 py-3 text-lg font-semibold shadow-lg transition-all duration-300 rounded-full bg-gradient-to-r from-blue-600 to-teal-400 text-white ring-1 ring-blue-200/40 hover:scale-[1.02]"
                   >
                     Try GraphLM
@@ -40,7 +40,7 @@ export default async function LandingPage() {
                 ) : (
                   <a
                     href={`/signin?callbackUrl=${encodeURIComponent(
-                      "/chat"
+                      "/workspace"
                     )}`}
                     className="inline-flex items-center gap-2 px-8 py-3 text-lg font-semibold shadow-lg transition-all duration-300 rounded-full bg-gradient-to-r from-blue-600 to-teal-400 text-white ring-1 ring-blue-200/40 hover:scale-[1.02]"
                   >
@@ -142,7 +142,7 @@ export default async function LandingPage() {
                   </p>
                   {session ? (
                     <a
-                      href="/chat"
+                      href="/workspace"
                       className="inline-flex items-center gap-2 px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-blue-600 to-teal-400 rounded-full text-white"
                     >
                       Try GraphLM
@@ -150,7 +150,7 @@ export default async function LandingPage() {
                   ) : (
                     <a
                       href={`/signin?callbackUrl=${encodeURIComponent(
-                        "/chat"
+                        "/workspace"
                       )}`}
                       className="inline-flex items-center gap-2 px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-blue-600 to-teal-400 rounded-full text-white"
                     >
