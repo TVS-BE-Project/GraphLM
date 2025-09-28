@@ -7,6 +7,7 @@ on:
 env:
   APPLICATION_PUBLISH_PROFILE: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_EA14EB738B884FE1B9D9B9A805BD6D47 }}
   WEBAPP_NAME: "GraphLM"
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,4 +34,5 @@ jobs:
           slot-name: "Production"
           publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
           package: .next/standalone
+
 
