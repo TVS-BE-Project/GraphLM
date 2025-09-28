@@ -16,25 +16,28 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
           node-version: "20.x"
-          
-      - name: npm install, build, and test
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Prepare artifact
         run: |
-          npm install
-          npm run build
-          mv ./build/static ./build/standalone/build
-          mv ./public ./build/standalone
-          
-      - name: "Deploy to Azure Web App"
-        id: deploy-to-webapp
+          mkdir -p output
+          cp -r .next node_modules public package.json output/
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.WEBAPP_NAME }}
           slot-name: "Production"
           publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
-          package: ./build/standalone
-
+          package: ./output
