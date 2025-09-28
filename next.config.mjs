@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  dirsDir: 'build',
   output: 'standalone',
   // Allow cross-origin dev requests for internal assets when developing via external origins
   allowedDevOrigins: [
@@ -14,5 +13,4 @@ const nextConfig = {
     '*.builder.io'
   ]
 };
-
 export default nextConfig;
