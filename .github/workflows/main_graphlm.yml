@@ -19,6 +19,9 @@ jobs:
       - name: npm install, build, and test
         run: |
           npm install --legacy-peer-deps
+          npx prisma migrate dev --name init 
+          npx prisma db push
+          npx prisma generate
           npm run build
           cp -r .next/static .next/standalone/.next/
           cp -r public .next/standalone/
@@ -30,3 +33,4 @@ jobs:
           slot-name: "Production"
           publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
           package: .next/standalone
+
