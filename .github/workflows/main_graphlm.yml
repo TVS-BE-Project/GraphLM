@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  APPLICATION_PUBLISH_PROFILE: ${{ secrets.APP_PUBLISH_PROFILE }}
+  APPLICATION_PUBLISH_PROFILE: ${{ secrets.PUBLISH_PROFILE }}
   WEBAPP_NAME: "GraphLM"
 
 jobs:
@@ -52,5 +52,6 @@ jobs:
           slot-name: "production"
           publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
           package: ./deploy
+
 
 
