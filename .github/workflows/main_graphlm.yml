@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  WEBAPP_NAME: "GraphLM"   # must exactly match your Azure App Service name
+  WEBAPP_NAME: "GraphLM"   
 
 jobs:
   build:
@@ -26,13 +26,15 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build Next.js app
-        run: npm run build
-
-      - name: Prepare artifact
+      - name: Build Next.js app (standalone)
         run: |
+          npm run build
+          # Next.js standalone output lives in .next/standalone
           mkdir -p output
-          cp -r .next node_modules public package.json output/
+          cp -r .next/standalone/* output/
+          cp -r .next/static output/.next/static
+          cp -r public output/public
+          cp package.json output/
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
