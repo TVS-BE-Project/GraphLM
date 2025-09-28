@@ -49,7 +49,8 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.WEBAPP_NAME }}
-          slot-name: "Production"
+          slot-name: "production"
           publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
           package: ./deploy
+
 
