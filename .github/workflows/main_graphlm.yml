@@ -26,8 +26,23 @@ jobs:
         run: |
           npm install --legacy-peer-deps
           npm run build
-          mv ./build/static ./build/standalone/build
-          mv ./public ./build/standalone
+          
+      - name: Prepare deployment package
+        run: |
+          # Check what was actually built
+          ls -la .next/
+          # Copy the Next.js standalone build if it exists
+          if [ -d ".next/standalone" ]; then
+            cp -r .next/standalone ./deploy
+            cp -r .next/static ./deploy/.next/
+            cp -r public ./deploy/
+          else
+            # Fallback: use the entire .next directory
+            mkdir -p ./deploy
+            cp -r .next ./deploy/
+            cp -r public ./deploy/
+            cp package.json ./deploy/
+          fi
           
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
@@ -36,4 +51,4 @@ jobs:
           app-name: ${{ env.WEBAPP_NAME }}
           slot-name: "Production"
           publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
-          package: ./build/standalone
+          package: ./deploy
