@@ -41,3 +41,4 @@ jobs:
           slot-name: "Production"
           publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
           package: ./output
+
