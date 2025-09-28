@@ -1,4 +1,4 @@
-name: Build and deploy Next.js app to Azure App Service
+name: Build and deploy Next.js app to Azure Web App
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 env:
   APPLICATION_PUBLISH_PROFILE: ${{ secrets.PUBLISH_PROFILE }}
-  WEBAPP_NAME: "GraphLM"
+  WEBAPP_NAME: "GraphLM"  
 
 jobs:
   build:
@@ -44,14 +44,16 @@ jobs:
             cp package.json ./deploy/
           fi
           
+      - name: Zip deployment package
+        run: |
+          cd deploy
+          zip -r ../deployment.zip .
+          cd ..
+
       - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.WEBAPP_NAME }}
-          slot-name: "production"
           publish-profile: ${{ env.APPLICATION_PUBLISH_PROFILE }}
-          package: ./deploy
-
-
-
+          package: ./deployment.zip
